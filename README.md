@@ -1,5 +1,5 @@
-## 👋 Hi there, I'm Aahil Khan
+##👋 Hi, I'm Aahil Khan
 
-🎯 Full-Stack Developer & AI Enthusiast  
-🚀 Exploring how AI can power real-world tools and developer workflows  
-🧠 Passionate about solving technical problems and learning by building
+🔧 Backend & Systems Engineer | AI-powered Applications  
+🚀 Building and operating backend systems, orchestration pipelines, and developer tools  
+🧠 Interested in reliable systems, automation, and applying AI to real world workflows
