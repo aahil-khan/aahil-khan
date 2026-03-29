@@ -41,8 +41,11 @@ I'm particularly drawn to AI systems, developer tooling, and the kind of infrast
 
 ### 📊 GitHub Stats
 
-![Aahil's GitHub stats](https://github-readme-stats-pearl-beta.vercel.app/api?username=aahil-khan&show_icons=true&theme=dark&hide_border=true&count_private=true)
-![Top Languages](https://github-readme-stats-pearl-beta.vercel.app/api/top-langs/?username=aahil-khan&layout=compact&hide_border=true&theme=dark)
+<p align="center">
+  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api?username=aahil-khan&show_icons=true&theme=github_dark&hide_border=true&count_private=true&include_all_commits=true&border_radius=12&title_color=58a6ff&icon_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
+  
+  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api/top-langs/?username=aahil-khan&layout=compact&theme=github_dark&hide_border=true&langs_count=6&border_radius=12&title_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
+</p>
 
 ---
 
