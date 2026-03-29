@@ -2,18 +2,6 @@
 
 Backend and full-stack engineer building AI-powered tools, developer workflows, and production systems.
 
----
-
-## Stats
-
-<p align="center">
-  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api?username=aahil-khan&show_icons=true&theme=github_dark&hide_border=true&count_private=true&include_all_commits=true&border_radius=12&title_color=58a6ff&icon_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
-  
-  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api/top-langs/?username=aahil-khan&layout=compact&theme=github_dark&hide_border=true&langs_count=6&hide=jupyter%20notebook,html,css&border_radius=12&title_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
-</p>
-
----
-
 ## Languages
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
@@ -43,8 +31,6 @@ Backend and full-stack engineer building AI-powered tools, developer workflows, 
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
 
----
-
 ## Highlights
 
 - 🥇 Samsung PRISM Web Agent Hackathon 2025  
@@ -52,8 +38,6 @@ Backend and full-stack engineer building AI-powered tools, developer workflows, 
 
 - 🏅 Innovation Award · Agentic AI Hackathon, Ulster University (UK) 2025  
   built persistent memory for coding agents using structured context extraction
-
----
 
 ## Find me around
 
