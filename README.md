@@ -1,18 +1,26 @@
 # Hi, I'm Aahil
 
-I'm a backend and full-stack engineer who likes building things that actually work in production — from lecture platforms handling thousands of users to AI-powered developer tools. Currently studying Computer Engineering at Thapar University.
-
-I'm particularly drawn to AI systems, developer tooling, and the kind of infrastructure work that makes everything else reliable.
+Backend and full-stack engineer building AI-powered tools, developer workflows, and production systems.
 
 ---
 
-**Languages**
+## Stats
+
+<p align="center">
+  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api?username=aahil-khan&show_icons=true&theme=github_dark&hide_border=true&count_private=true&include_all_commits=true&border_radius=12&title_color=58a6ff&icon_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
+  
+  <img height="170" src="https://github-readme-stats-pearl-beta.vercel.app/api/top-langs/?username=aahil-khan&layout=compact&theme=github_dark&hide_border=true&langs_count=6&hide=jupyter%20notebook,html,css&border_radius=12&title_color=58a6ff&text_color=c9d1d9&bg_color=0d1117" />
+</p>
+
+---
+
+## Languages
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 
-**Backend & Databases**
+## Backend & Databases
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)
@@ -22,13 +30,13 @@ I'm particularly drawn to AI systems, developer tooling, and the kind of infrast
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
 
-**Frontend**
+## Frontend
 
-![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
 
-**Cloud & DevOps**
+## Cloud & DevOps
 
 ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazon-aws&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
@@ -37,14 +45,17 @@ I'm particularly drawn to AI systems, developer tooling, and the kind of infrast
 
 ---
 
-### A couple of highlights
+## Highlights
 
-- 🥇 **Samsung PRISM Web Agent Hackathon 2025** — built an on-device browsing knowledge base with local semantic search
-- 🏅 **Innovation Award · Agentic AI Hackathon, Ulster University (UK) 2025** — built an AI project memory system for coding agents
+- 🥇 Samsung PRISM Web Agent Hackathon 2025  
+  built an on-device browsing knowledge base with local semantic retrieval
+
+- 🏅 Innovation Award · Agentic AI Hackathon, Ulster University (UK) 2025  
+  built persistent memory for coding agents using structured context extraction
 
 ---
 
-### 📬 Find me around
+## Find me around
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=flat&logoColor=white)](https://aahil-khan.tech)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aahil-khan-015671287/)
