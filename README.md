@@ -46,6 +46,6 @@ Backend and full-stack engineer building AI-powered tools, developer workflows, 
 
 ## Find me around
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-2d2d2d?style=flat&logoColor=white)](https://aahil-khan.tech)
+[![Portfolio](https://img.shields.io/badge/Portfolio-2d2d2d?style=flat&logoColor=white)](https://aahil-khan.xyz)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aahil-khan-015671287/)
 [![Email](https://img.shields.io/badge/Email-EA4335?style=flat&logo=gmail&logoColor=white)](mailto:aahilminookhan@gmail.com)
