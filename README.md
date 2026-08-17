@@ -20,7 +20,7 @@ Bareilly, India
 
 <br>
 
-I build AI systems that hold up outside a demo — RAG pipelines, multi-agent pipelines, and the full-stack plumbing nobody notices until it breaks. Most of it started as something that looked shiny at 2AM.
+I build whatever sends me down a rabbit hole. These days, it's mostly software (with a little electronics on the side)
 
 - Research Intern, **Samsung PRISM** — accent-invariant representation learning for multilingual SpeechLLMs
 - Full Stack AI Intern, **Oddmind Innovations** — building an AI interview platform end to end
@@ -38,7 +38,7 @@ RAG · LangGraph · Vector search · LLMs · Multi-agent systems
 
 <br>
 
-**Winner**, Samsung PRISM Web Agent Hackathon 2025 — *Konta*
+**Winner**, Samsung PRISM Web Agent Hackathon 2025 — *Konta* <br>
 **Innovation Award**, Agentic AI Hackathon, Ulster University (UK) 2025 — *FlowSync*
 
 <br>
