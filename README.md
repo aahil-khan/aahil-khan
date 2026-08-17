@@ -1,9 +1,9 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&pause=2000&color=F2F2F2&background=00000000&center=true&vCenter=true&width=520&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
-  <source media="(prefers-color-scheme: light)" srcset="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&pause=2000&color=1F1F1F&background=00000000&center=true&vCenter=true&width=520&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
-  <img alt="Full-stack engineer, AI retrieval & agents" src="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&color=1F1F1F&center=true&vCenter=true&width=520&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&pause=2000&color=F2F2F2&background=00000000&center=true&vCenter=true&width=680&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
+  <source media="(prefers-color-scheme: light)" srcset="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&pause=2000&color=1F1F1F&background=00000000&center=true&vCenter=true&width=680&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
+  <img alt="Full-stack engineer, AI retrieval & agents" src="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=500&size=22&color=1F1F1F&center=true&vCenter=true&width=680&lines=Full-stack+engineer%2C+AI+retrieval+%26+agents" />
 </picture>
 
 Bareilly, India
@@ -38,12 +38,6 @@ RAG · LangGraph · Vector search · LLMs · Multi-agent systems
 
 <br>
 
-<div align="center">
-<img src="https://github-readme-stats.vercel.app/api?username=aahil-khan&show_icons=true&theme=dark&hide_border=true&bg_color=0D1117&title_color=58A6FF&icon_color=58A6FF&text_color=C9D1D9&count_private=true" width="65%" alt="GitHub stats"/>
-</div>
-
-<br>
-
 **Winner**, Samsung PRISM Web Agent Hackathon 2025 — *Konta*
 **Innovation Award**, Agentic AI Hackathon, Ulster University (UK) 2025 — *FlowSync*
 
@@ -51,6 +45,6 @@ RAG · LangGraph · Vector search · LLMs · Multi-agent systems
 
 <div align="center">
 
-![Profile Views](https://komarev.com/ghpvc/?username=aahil-khan&color=0D1117&style=for-the-badge&label=Profile+Views)
+![Profile Views](https://komarev.com/ghpvc/?username=aahil-khan&color=58A6FF&style=for-the-badge&label=Profile+Views)
 
 </div>
