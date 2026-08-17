@@ -1,0 +1,24 @@
+name: metrics
+
+on:
+  schedule:
+    - cron: "0 0 * * *"    # regenerate once a day
+  workflow_dispatch: {}     # lets you trigger it manually from the Actions tab
+  push:
+    branches: [ main ]
+
+jobs:
+  isocalendar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.isocalendar.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_isocalendar: yes
+          plugin_isocalendar_duration: full-year
+          config_timezone: Asia/Kolkata
+          config_theme: dark
