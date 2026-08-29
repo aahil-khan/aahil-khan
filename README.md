@@ -38,8 +38,9 @@ RAG · LangGraph · Vector search · LLMs · Multi-agent systems
 
 <br>
 
-**Winner**, Samsung PRISM Web Agent Hackathon 2025 — *Konta* <br>
-**Innovation Award**, Agentic AI Hackathon, Ulster University (UK) 2025 — *FlowSync*
+🏆 **1st Place** — Economic Times AI Hackathon 2.0 — *SOP Opera* <br>
+🏆 **Winner**, Samsung PRISM Web Agent Hackathon 2025 — *Konta* <br>
+🏅 **Innovation Award**, Agentic AI Hackathon, Ulster University (UK) 2025 — *FlowSync*
 
 <br>
 
