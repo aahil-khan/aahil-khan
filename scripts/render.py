@@ -250,15 +250,11 @@ def frames(c, x, y, variants, spans, period, size=12, fill="ink"):
 
 # ------------------------------------------------------------------ hero
 
-# Rows of the cat that sits on now.txt. Row 1 is swapped for the eye frames.
-HERO_CAT = [
-    "  /\\_/\\",
-    " ( o.o )",
-    " /  ^  \\",
-    "(_)___(_)",
-]
-HERO_EYES = {"open": " ( o.o )", "shut": " ( -.- )", "right": " (  o.o)", "left": " (o.o  )"}
-HERO_TAIL = [")", "(", ")", "'"]
+# The classic cat, sitting on now.txt with its paws over the edge.
+HERO_HEAD = "  /\\_/\\"
+HERO_EYES = {"open": " ( o.o )", "blink": " ( -.- )", "happy": " ( ^.^ )"}
+HERO_BODY = ["  > ^ <", ' (")_(")']
+
 
 NOW = [
     ("building", "AI interviews"),
@@ -312,32 +308,30 @@ def hero(theme):
         c.add(c.rich(wx0 + 20, wy0 + 58 + i * lh, [(f"{label:<11}", label_colour), (value, "ink" if label else "muted")],
                      size=fs, attrs=c.win([(1.0 + i * 0.09, None)], 3)))
 
-    # The cat. It blinks, glances about, and its tail hangs over the window's
-    # edge (clear of the shadow) and sways as one piece.
-    cs, clh = 17, 17
+    # The cat: a slow blink now and then, a contented squint, and a tail
+    # resting on the ledge that sways a little.
+    cs, clh = 15, 16
     cw = MONO * cs
-    edge = wx0 + ww + 15
-    cx = wx0 + ww - 9.6 * cw
-    base = wy0 - 5
-    look = 9.0
-    eye_spans = {
-        "open": [(0, 2.6), (2.75, 4.2), (5.8, 7.0), (8.0, None)],
-        "shut": [(2.6, 2.75)],
-        "right": [(4.2, 5.8)],
-        "left": [(7.0, 8.0)],
+    cx = wx0 + ww - 11 * cw
+    base = wy0 - 4
+    rows = [HERO_HEAD, None] + HERO_BODY
+    period = 8.0
+    eyes = {
+        "open": [(0, 2.5), (2.9, 5.2), (6.6, None)],
+        "blink": [(2.5, 2.9)],
+        "happy": [(5.2, 6.6)],
     }
-    for i, row in enumerate(HERO_CAT):
-        y = base - (len(HERO_CAT) - 1 - i) * clh
-        if i == 1:
+    for i, row in enumerate(rows):
+        y = base - (len(rows) - 1 - i) * clh
+        if row is None:
             for k, v in HERO_EYES.items():
-                c.add(c.text(cx, y, v, size=cs, mono=True, attrs=c.win(eye_spans[k], look, True)))
+                c.add(c.text(cx, y, v, size=cs, mono=True, attrs=c.win(eyes[k], period, True)))
         else:
             c.add(c.text(cx, y, row, size=cs, mono=True))
-    c.add(c.text(cx + 9 * cw, base, "_", size=cs, mono=True))
-    tail = "".join(c.text(edge, base + (j + 1) * 15, ch, size=cs, mono=True) for j, ch in enumerate(HERO_TAIL))
-    c.rule("@keyframes sway{from{transform:rotate(7deg)}to{transform:rotate(-20deg)}}")
-    c.add(f'<g style="transform-origin:{edge + 2:.1f}px {base - 2}px;animation:sway 1.7s ease-in-out infinite alternate">'
-          f"{tail}</g>")
+    tx, ty = cx + 8 * cw, base
+    c.rule("@keyframes sway{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}")
+    c.add(f'<g style="transform-origin:{tx:.1f}px {ty - 3}px;animation:sway 2.4s ease-in-out infinite alternate">'
+          + c.text(tx, ty, "_/", size=cs, mono=True) + "</g>")
     return c.render()
 
 
@@ -351,31 +345,11 @@ def button(theme, kind, label):
     pad = 22
     if kind == "primary":
         w = pad + tw + 12 + 30 + 8
-    elif kind == "fun":
-        badge = "highly recommended"
-        bw = advance(("G", 700), badge, 10.5) + 18
-        w = 20 + 10 + tw + 12 + bw + 14
     else:
         w = pad + tw + pad
     W, H = int(w + 10), 56
     c = Svg(W, H, theme, label, still=2)
     h = 44
-    if kind == "fun":
-        # The dashed "there's a far more fun version" pill from the site's hero.
-        c.add(f'<rect x="2" y="4" width="{w:.1f}" height="{h}" rx="22" fill="none" stroke="{t["subtle"]}" '
-              f'stroke-width="1.5" stroke-dasharray="5 4"/>')
-        c.rule("@keyframes ping{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.6);opacity:0}}")
-        c.add(f'<circle cx="22" cy="{4 + h / 2}" r="4" fill="{t["accent"]}" stroke="{t["border"]}" stroke-width="1.2"/>'
-              f'<circle cx="22" cy="{4 + h / 2}" r="4" fill="{t["accent"]}" '
-              f'style="transform-box:fill-box;transform-origin:center;animation:ping 1.8s ease-out infinite"/>')
-        c.add(c.text(34, 4 + h / 2 + 5, label, size=size, weight=500))
-        bx = 34 + tw + 12
-        c.rule("@keyframes nudge{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-4deg)}90%{transform:rotate(4deg)}95%{transform:rotate(-2deg)}}")
-        c.add(f'<g style="transform-box:fill-box;transform-origin:center;animation:nudge 3.2s ease-in-out infinite">'
-              f'<rect x="{bx:.1f}" y="{4 + h / 2 - 10}" width="{bw:.1f}" height="20" rx="10" fill="{t["accent"]}" '
-              f'stroke="{t["border"]}" stroke-width="1.5"/>'
-              + c.text(bx + 9, 4 + h / 2 + 3.8, badge, size=10.5, weight=700, fill="accent_ink") + "</g>")
-        return c.render()
     c.add(f'<rect x="6" y="8" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["border"]}"/>'
           f'<rect x="2" y="4" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["surface"]}" '
           f'stroke="{t["border"]}" stroke-width="2"/>')
@@ -390,8 +364,7 @@ def button(theme, kind, label):
 
 
 BUTTONS = {
-    "site": ("primary", "aahil-khan.xyz"),
-    "fun": ("fun", "There’s a far more fun version of this"),
+    "site": ("primary", "Portfolio"),
     "resume": ("plain", "Résumé PDF ↓"),
     "linkedin": ("plain", "LinkedIn ↗"),
     "email": ("plain", "Email ↗"),
@@ -436,10 +409,10 @@ ROW_Y = (40, 62, 84)
 
 
 def sop_opera(theme):
-    c = Svg(840, 124, theme, "01 SOP Opera: agentic industrial safety intelligence. Winner, Economic Times "
+    c = Svg(840, 124, theme, "02 SOP Opera: agentic industrial safety intelligence. Winner, Economic Times "
             "AI Hackathon 2.0. A sensor trace crosses its limit, an agent acts, and the decision joins a "
             "tamper-evident hash chain.", still=5)
-    work_row(c, "01", "SOP Opera", "Agentic industrial safety intelligence", "WINNER · ET AI HACKATHON 2.0",
+    work_row(c, "02", "SOP Opera", "Agentic industrial safety intelligence", "WINNER · ET AI HACKATHON 2.0",
              ["PYTHON", "LANGGRAPH", "FASTAPI", "NEXT.JS"])
     t = c.t
     col0, cols = 4, 30
@@ -478,9 +451,9 @@ def sop_opera(theme):
 
 
 def konta(theme):
-    c = Svg(840, 124, theme, "02 Konta: local-first, context-aware browsing. Winner, Samsung PRISM Web Agent "
+    c = Svg(840, 124, theme, "03 Konta: local-first, context-aware browsing. Winner, Samsung PRISM Web Agent "
             "Hackathon. Open tabs become a graph you can search in plain words.", still=6.5)
-    work_row(c, "02", "Konta", "Local-first context-aware browsing", "WINNER · SAMSUNG PRISM",
+    work_row(c, "03", "Konta", "Local-first context-aware browsing", "WINNER · SAMSUNG PRISM",
              ["REACT", "TYPESCRIPT", "CHROME"])
     P, end = 9.0, 8.5
     tabs = [(0, "[github]"), (9, "[arxiv]"), (17, "[docs]"), (24, "[yt]")]
@@ -508,10 +481,10 @@ def konta(theme):
 
 
 def flowsync(theme):
-    c = Svg(840, 124, theme, "03 FlowSync AI: project memory for coding agents, over MCP. Innovation Award, "
+    c = Svg(840, 124, theme, "04 FlowSync AI: project memory for coding agents, over MCP. Innovation Award, "
             "Agentic AI Hackathon, Ulster University. Pushes stream into a project brain an agent can ask later.",
             still=7)
-    work_row(c, "03", "FlowSync AI", "Project memory for coding agents, over MCP", "INNOVATION AWARD · ULSTER",
+    work_row(c, "04", "FlowSync AI", "Project memory for coding agents, over MCP", "INNOVATION AWARD · ULSTER",
              ["TYPESCRIPT", "PYTHON", "AWS", "BEDROCK"])
     P, end = 10.0, 9.5
     s, t1 = typed(c, TX, ROW_Y[0], "$ git push origin main", 0.2, P, cps=20, end=end, size=FS)
@@ -532,26 +505,24 @@ def flowsync(theme):
     return c.render()
 
 
-def gina(theme):
-    c = Svg(840, 124, theme, "04 GINA: natural language to SQL analytics. A question becomes a query, and "
-            "the query becomes a chart.", still=7.5)
-    work_row(c, "04", "GINA", "Natural language → SQL analytics", None, ["NEXT.JS", "TYPESCRIPT", "POSTGRESQL"])
+def holt(theme):
+    c = Svg(840, 124, theme, "01 holt: finds open-source projects that will actually merge your first PR. "
+            "Winner, micro1 Frontier Engineering Challenge. It reads a repository's pull-request history "
+            "and returns a verdict.", still=7)
+    work_row(c, "01", "holt", "Finds OSS projects that will actually merge your first PR",
+             "WINNER · MICRO1 FRONTIER ENGINEERING CHALLENGE", ["PYTHON", "TYPESCRIPT", "GITHUB API"])
     P, end = 10.0, 9.5
-    q, t1 = typed(c, TX, ROW_Y[0], "> top 3 cities by revenue", 0.2, P, cps=16, end=end, size=FS)
-    c.add(q)
-    c.add(c.rich(TX, ROW_Y[1], [("SELECT ", "subtle"), ("city, SUM(rev) ", "ink"), ("FROM ", "subtle"), ("sales", "ink")],
-                 size=FS, attrs=c.win([(t1 + 0.4, end)], P, True)))
-    at = t1 + 1.0
-    col = 0
-    for city, n in [("Delhi", 6), ("Mumbai", 4), ("Pune", 2)]:
-        c.add(c.text(TX + col * CW, ROW_Y[2], city, size=FS, mono=True, fill="muted", attrs=c.win([(at, end)], P, True)))
-        col += len(city) + 1
-        for j in range(n):
-            c.add(c.text(TX + col * CW, ROW_Y[2], "#", size=FS, mono=True, attrs=c.win([(at + 0.1 + j * 0.07, end)], P, True)))
-            col += 1
-        at += 0.1 + n * 0.07
-        col += 2
+    s, t1 = typed(c, TX, ROW_Y[0], "$ holt analyze owner/repo", 0.2, P, cps=18, end=end, size=FS)
+    c.add(s)
+    c.add(c.text(TX, ROW_Y[1], "reading PRs", size=FS, mono=True, fill="subtle", attrs=c.win([(t1 + 0.2, end)], P, True)))
+    bars = ["[      ]", "[##    ]", "[####  ]", "[######]"]
+    spans = [(t1 + 0.2 + k * 0.5, t1 + 0.7 + k * 0.5 if k < 3 else end) for k in range(4)]
+    c.add(frames(c, TX + 12 * CW, ROW_Y[1], bars, spans, P, size=FS, fill="muted"))
+    t2 = t1 + 2.4
+    c.add(c.rich(TX, ROW_Y[2], [("verdict ", "subtle"), ("Worth your time", c.t["signal"])], size=FS,
+                 attrs=c.win([(t2, end)], P, True)))
     return c.render()
+
 
 
 # ------------------------------------------------------------------ stack
@@ -636,104 +607,61 @@ def stack(theme):
 
 # ----------------------------------------------------------------- footer
 
-# A side-on cat walking left, in two strides; tail up and flicking in time.
-WALK = (
-    ["    /\\_/\\             ,",
-     "   ( o.o )           //",
-     "    > ^ < \\_________//",
-     "     (              )",
-     "      \\_  _______  _/",
-     "        \\ \\      / /"],
-    ["    /\\_/\\            _",
-     "   ( o.o )          ( )",
-     "    > ^ < \\_________/ /",
-     "     (              )",
-     "      \\_  _______  _/",
-     "        / /      \\ \\"],
-)
-# Sitting, head where the walking head was.
-SIT = ["    /\\_/\\",
-       "   ( o.o )",
-       "    > ^ <",
-       "   /     \\",
-       "  (  | |  )_",
-       "   \\_|_|_/  )"]
-SIT_BLINK = "   ( -.- )"
-SIT_TAIL = ("  (  | |  )_", "  (  | |  )__")
-SIT_TIP = ("   \\_|_|_/  )", "   \\_|_|_/   )")
+# A small cat trotting left: two strides that shift its paws one column.
+TROT_HEAD = " /\\_/\\"
+TROT_BODY = ("( o.o )___/", "( -.- )___/")
+TROT_PAWS = (' " "  " "', '  " "  " "')
 
 
 def footer(theme):
-    W, H = 840, 268
+    W, H = 840, 222
     c = Svg(W, H, theme, "Let's build something. Open for cool builds and interesting problems; email is "
-            "fastest. A cat walks in, sits down to say mrrp, and walks off.", still=9.5)
+            "fastest. A small cat trots across, stops to blink, and trots on.", still=8)
     t = c.t
     c.add(c.card(2, 2, W - 10, H - 10, fill="band"))
     c.add(c.text(40, 54, "CONTACT", size=11, weight=500, fill="muted", spacing=0.16))
-    c.add(c.text(40, 96, "Let\u2019s build something.", size=34, weight=700, spacing=-0.02))
+    c.add(c.text(40, 96, "Let’s build something.", size=34, weight=700, spacing=-0.02))
     c.add(c.text(40, 124, "Open for cool builds and interesting problems. Email is fastest, I answer all of them.",
                  size=14, fill="muted"))
 
-    fs, lh = 14, 15
-    cw = MONO * fs
-    top = 150
-    period = 22.0
-    stride = 0.25                      # one leg frame, and one step forward
-    step_px = 2 * cw
-    x_in, x_sit = W + 10, W / 2 - 60
-    n_in = round((x_in - x_sit) / step_px)
-    x_sit = x_in - n_in * step_px
-    n_out = 34
-    x_out = x_sit - n_out * step_px
-    t_sit = n_in * stride
-    t_up = t_sit + 4.5
-    t_gone = t_up + n_out * stride
+    fs, lh = 13, 14
+    top = 156
+    period = 20.0
+    stride = 0.2
+    x_in, x_stop, x_out = W + 10, W / 2 - 40, -110
+    speed = 55.0                                   # px per second, steady
+    t_stop = (x_in - x_stop) / speed
+    t_go = t_stop + 2.2
+    t_gone = t_go + (x_stop - x_out) / speed
 
-    def pose(rows, spans):
-        attrs = c.win(spans, period, True)
-        return f"<g {attrs}>" + "".join(c.text(0, top + i * lh, r, size=fs, mono=True) for i, r in enumerate(rows)) + "</g>"
+    def alternate(t0, t1, phase):
+        return [(s, min(s + stride, t1)) for k, s in enumerate(frange(t0, t1, stride)) if k % 2 == phase]
 
-    def strides(t0, t1, phase):
-        return [(s, s + stride) for k, s in enumerate(frange(t0, t1, stride)) if k % 2 == phase]
-
-    walk = pose(WALK[0], strides(0, t_sit, 0) + strides(t_up, t_gone, 0)) \
-        + pose(WALK[1], strides(0, t_sit, 1) + strides(t_up, t_gone, 1))
-
-    # Sitting: blinks twice, flicks its tail tip, and says something.
-    sit_on = [(t_sit, t_up)]
-    blinks = [(t_sit + 1.0, t_sit + 1.15), (t_sit + 2.8, t_sit + 2.95)]
-    sit = "".join(c.text(0, top + i * lh, r, size=fs, mono=True, attrs=c.win(sit_on, period, True))
-                  for i, r in enumerate(SIT) if i not in (1, 4, 5))
-    eyes_open = [(t_sit, blinks[0][0]), (blinks[0][1], blinks[1][0]), (blinks[1][1], t_up)]
-    sit += c.text(0, top + lh, SIT[1], size=fs, mono=True, attrs=c.win(eyes_open, period, True))
-    sit += c.text(0, top + lh, SIT_BLINK, size=fs, mono=True, attrs=c.win(blinks, period, True))
-    flick = [(s, s + 0.4) for s in frange(t_sit + 0.4, t_up - 0.4, 0.8)]
-    rest = []
-    cur = t_sit
-    for s, e in flick:
-        rest.append((cur, s))
-        cur = e
-    rest.append((cur, t_up))
-    for row, pair in ((4, SIT_TAIL), (5, SIT_TIP)):
-        sit += c.text(0, top + row * lh, pair[0], size=fs, mono=True, attrs=c.win(rest, period, True))
-        sit += c.text(0, top + row * lh, pair[1], size=fs, mono=True, attrs=c.win(flick, period, True))
-    say = c.text(-4 * cw, top - 12, "mrrp?", size=12, mono=True, fill="muted",
-                 attrs=c.win([(t_sit + 1.6, t_up - 0.6)], period, True))
-
+    moving = [(0, t_stop), (t_go, period)]
+    paws_b = [sp for a, b in moving for sp in alternate(a, b, 1)]
+    paws_a = [sp for a, b in moving for sp in alternate(a, b, 0)] + [(t_stop, t_go)]
+    blink = [(t_stop + 0.8, t_stop + 1.0)]
+    open_eyes = [(0, blink[0][0]), (blink[0][1], None)]
+    cat = (c.text(0, top, TROT_HEAD, size=fs, mono=True)
+           + c.text(0, top + lh, TROT_BODY[0], size=fs, mono=True, attrs=c.win(open_eyes, period, True))
+           + c.text(0, top + lh, TROT_BODY[1], size=fs, mono=True, attrs=c.win(blink, period, True))
+           + c.text(0, top + 2 * lh, TROT_PAWS[0], size=fs, mono=True, attrs=c.win(paws_a, period, True))
+           + c.text(0, top + 2 * lh, TROT_PAWS[1], size=fs, mono=True, attrs=c.win(paws_b, period, True)))
+    # A slight bob while trotting, still while stopped.
+    c.rule("@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}")
     pct = lambda s: f"{s / period * 100:.2f}%"
-    c.rule("@keyframes stroll{"
-           f"0%{{transform:translateX({x_in:.1f}px);animation-timing-function:steps({n_in},end)}}"
-           f"{pct(t_sit)}{{transform:translateX({x_sit:.1f}px);animation-timing-function:linear}}"
-           f"{pct(t_up)}{{transform:translateX({x_sit:.1f}px);animation-timing-function:steps({n_out},end)}}"
+    c.rule("@keyframes trot{"
+           f"0%{{transform:translateX({x_in:.1f}px)}}"
+           f"{pct(t_stop)},{pct(t_go)}{{transform:translateX({x_stop:.1f}px)}}"
            f"{pct(t_gone)},100%{{transform:translateX({x_out:.1f}px)}}}}")
-    c.rule(f"@media (prefers-reduced-motion: reduce){{.cat{{transform:translateX({x_sit:.1f}px)}}}}")
+    c.rule(f"@media (prefers-reduced-motion: reduce){{.cat{{transform:translateX({x_stop:.1f}px)}}}}")
     clip = f"fc{theme}"
-    c.defs.append(f'<clipPath id="{clip}"><rect x="3" y="130" width="{W - 12}" height="{H - 142}" rx="12"/></clipPath>')
-    ground = top + 5 * lh + 9
+    c.defs.append(f'<clipPath id="{clip}"><rect x="3" y="136" width="{W - 12}" height="{H - 148}" rx="12"/></clipPath>')
+    ground = top + 2 * lh + 8
     c.add(f'<line x1="40" y1="{ground}" x2="{W - 48}" y2="{ground}" stroke="{t["subtle"]}" '
           f'stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"/>')
-    c.add(f'<g clip-path="url(#{clip})"><g class="cat" style="animation:stroll {period}s infinite">'
-          f"{walk}{sit}{say}</g></g>")
+    c.add(f'<g clip-path="url(#{clip})"><g class="cat" style="animation:trot {period}s linear infinite">'
+          f'<g style="animation:bob {2 * stride}s ease-in-out infinite">{cat}</g></g></g>')
     return c.render()
 
 
@@ -746,8 +674,8 @@ def frange(a, b, step):
 
 
 PIECES = {
-    "hero": hero, "work-head": work_head, "work-sop-opera": sop_opera, "work-konta": konta,
-    "work-flowsync": flowsync, "work-gina": gina, "stack": stack, "footer": footer,
+    "hero": hero, "work-head": work_head, "work-holt": holt, "work-sop-opera": sop_opera,
+    "work-konta": konta, "work-flowsync": flowsync, "stack": stack, "footer": footer,
 }
 
 
