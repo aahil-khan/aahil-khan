@@ -17,7 +17,6 @@ import base64
 import html
 import io
 import pathlib
-import re
 import urllib.request
 from collections import defaultdict
 
@@ -42,12 +41,15 @@ THEMES = {
         surface="#FFFFFF", sunken="#F4F2EA", bar="#FDF7C4",
         ink="#161616", muted="rgba(22,22,22,0.62)", subtle="rgba(22,22,22,0.45)",
         accent="#FACC00", accent_ink="#161616", border="#161616",
+        # The site's recessed band: 9% ink mixed into the paper.
+        band="#E3E1DB", signal="#E4572E", page="#FFFFFF",
     ),
     "dark": dict(
         paper="#1A1B26", glow="rgba(192,202,245,0.05)", grid="rgba(192,202,245,0.07)",
         surface="#16161E", sunken="#1F2335", bar="#24283B",
         ink="#C0CAF5", muted="#A9B1D6", subtle="#949EC8",
         accent="#E0AF68", accent_ink="#1A1B26", border="#C0CAF5",
+        band="#292B39", signal="#E0AF68", page="#0D1117",
     ),
 }
 
@@ -248,28 +250,40 @@ def frames(c, x, y, variants, spans, period, size=12, fill="ink"):
 
 # ------------------------------------------------------------------ hero
 
+# Rows of the cat that sits on now.txt. Row 1 is swapped for the eye frames.
 HERO_CAT = [
     "  /\\_/\\",
     " ( o.o )",
     " /  ^  \\",
     "(_)___(_)",
 ]
-HERO_CAT_BLINK = " ( -.- )"
-HERO_TAIL = (["", ")", "(", ")"], ["", "(", ")", "("])
+HERO_EYES = {"open": " ( o.o )", "shut": " ( -.- )", "right": " (  o.o)", "left": " (o.o  )"}
+HERO_TAIL = [")", "(", ")", "'"]
+
+NOW = [
+    ("building", "AI interviews"),
+    ("", "at Oddmind"),
+    ("tinkering", "GNOME extensions"),
+    ("chasing", "OSS contributions"),
+    ("studying", "Thapar, final yr"),
+    ("", "+ IIT Madras"),
+    ("", "diploma"),
+]
 
 
 def hero(theme):
-    W, H = 840, 470
-    c = Svg(W, H, theme, "Aahil Khan. Full-stack engineer building AI retrieval and agent systems that "
-            "hold up in production. Bareilly, India. 9.16 CGPA, 3 hackathon wins, 3 domains, 2 internships. "
-            "An ASCII cat sits on a window listing what he is doing now.", still=6)
+    W, H = 840, 404
+    c = Svg(W, H, theme, "Aahil Khan, Bareilly, India. Full-stack engineer building AI retrieval and agent "
+            "systems that hold up in production. A cat sits on a now.txt window: building AI interviews "
+            "at Oddmind, tinkering with GNOME extensions, chasing OSS contributions, final year at Thapar "
+            "plus an IIT Madras diploma.", still=6)
     t = c.t
     c.add(c.paper(2, 2, W - 10, H - 10))
 
     x0 = 40
     c.add(c.text(x0, 58, "BAREILLY, INDIA", size=11, weight=500, fill="muted", spacing=0.16))
     lx = x0 + advance(("G", 500), "BAREILLY, INDIA", 11, 0.16) + 14
-    c.add(f'<line x1="{lx:.1f}" y1="54" x2="480" y2="54" stroke="{t["subtle"]}" stroke-width="1"/>')
+    c.add(f'<line x1="{lx:.1f}" y1="54" x2="460" y2="54" stroke="{t["subtle"]}" stroke-width="1"/>')
 
     # The name rises into place, like the site's hero.
     c.rule("@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}")
@@ -278,251 +292,265 @@ def hero(theme):
               + c.text(x0 - 4, y, word, size=100, weight=700, spacing=-0.03) + "</g>")
 
     # Headline: the bold phrase lands word by word, then gets its highlighter.
-    c.add(c.text(x0, 292, "Full-stack engineer building", size=22))
-    words = "AI retrieval and agent systems".split()
+    c.add(c.text(x0, 294, "Full-stack engineer building", size=22))
     wx = x0
-    for i, word in enumerate(words):
-        c.add(c.text(wx, 322, word, size=22, weight=700, attrs=c.win([(0.6 + i * 0.14, None)], 3)))
+    for i, word in enumerate("AI retrieval and agent systems".split()):
+        c.add(c.text(wx, 324, word, size=22, weight=700, attrs=c.win([(0.6 + i * 0.14, None)], 3)))
         wx += advance(("G", 700), word + " ", 22)
-    c.add(c.text(x0, 352, "that hold up in production.", size=22))
+    c.add(c.text(x0, 354, "that hold up in production.", size=22))
     hl_w = advance(("G", 700), "AI retrieval and agent systems", 22)
-    c.rule(f"@keyframes swipe{{from{{transform:scaleX(0)}}to{{transform:scaleX(1)}}}}")
-    c.add(f'<rect x="{x0}" y="327" width="{hl_w:.1f}" height="5" rx="1.5" fill="{t["accent"]}" '
+    c.rule("@keyframes swipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}")
+    c.add(f'<rect x="{x0}" y="329" width="{hl_w:.1f}" height="5" rx="1.5" fill="{t["accent"]}" '
           f'style="transform-box:fill-box;transform-origin:left;animation:swipe .6s cubic-bezier(.16,1,.3,1) 1.5s both"/>')
 
-    # Stats row, as on the site.
-    c.add(f'<line x1="{x0}" y1="386" x2="{W - 48}" y2="386" stroke="{t["subtle"]}" stroke-width="1"/>')
-    sx = x0
-    for num, label in [("9.16", "CGPA"), ("3", "WINS"), ("3", "DOMAINS"), ("2", "INTERNSHIPS")]:
-        c.add(c.text(sx, 424, num, size=28, weight=700))
-        c.add(c.text(sx, 443, label, size=9.5, weight=500, fill="muted", spacing=0.16))
-        sx += max(advance(("G", 700), num, 28), advance(("G", 500), label, 9.5, 0.16)) + 34
-
-    # now.txt, with a cat sitting on it.
-    wx0, wy0, ww, wh = 530, 124, 262, 222
+    # now.txt
+    wx0, wy0, ww, wh = 496, 128, 272, 214
     c.add(c.window(wx0, wy0, ww, wh, "now.txt"))
     fs, lh = 12, 19.5
-    lines = [
-        [("research", "accent_label"), ("  Samsung PRISM", "ink")],
-        [("          accent-invariant", "muted")],
-        [("          speech LLMs", "muted")],
-        [("building", "accent_label"), ("  AI interviews", "ink")],
-        [("          at Oddmind", "muted")],
-        [("studying", "accent_label"), ("  Thapar, final yr", "ink")],
-        [("          + IIT Madras", "muted")],
-        [("          diploma", "muted")],
-    ]
     label_colour = t["ink"] if theme == "light" else t["accent"]
-    for i, runs in enumerate(lines):
-        runs = [(s, label_colour if col == "accent_label" else col) for s, col in runs]
-        c.add(c.rich(wx0 + 20, wy0 + 58 + i * lh, runs, size=fs,
-                     attrs=c.win([(1.0 + i * 0.09, None)], 3)))
+    for i, (label, value) in enumerate(NOW):
+        c.add(c.rich(wx0 + 20, wy0 + 58 + i * lh, [(f"{label:<11}", label_colour), (value, "ink" if label else "muted")],
+                     size=fs, attrs=c.win([(1.0 + i * 0.09, None)], 3)))
 
-    # The cat: blinks, and swings its tail over the edge of the window,
-    # clear of the window's shadow so it doesn't vanish into it.
+    # The cat. It blinks, glances about, and its tail hangs over the window's
+    # edge (clear of the shadow) and sways as one piece.
     cs, clh = 17, 17
     cw = MONO * cs
-    edge = wx0 + ww + 8
-    cx = edge - 10.5 * cw
+    edge = wx0 + ww + 15
+    cx = wx0 + ww - 9.6 * cw
     base = wy0 - 5
+    look = 9.0
+    eye_spans = {
+        "open": [(0, 2.6), (2.75, 4.2), (5.8, 7.0), (8.0, None)],
+        "shut": [(2.6, 2.75)],
+        "right": [(4.2, 5.8)],
+        "left": [(7.0, 8.0)],
+    }
     for i, row in enumerate(HERO_CAT):
         y = base - (len(HERO_CAT) - 1 - i) * clh
         if i == 1:
-            c.add(c.text(cx, y, row, size=cs, mono=True, attrs=c.win([(0, 4.2), (4.35, 4.9), (5.05, None)], 6.5, True)))
-            c.add(c.text(cx, y, HERO_CAT_BLINK, size=cs, mono=True, attrs=c.win([(4.2, 4.35), (4.9, 5.05)], 6.5, True)))
+            for k, v in HERO_EYES.items():
+                c.add(c.text(cx, y, v, size=cs, mono=True, attrs=c.win(eye_spans[k], look, True)))
         else:
             c.add(c.text(cx, y, row, size=cs, mono=True))
     c.add(c.text(cx + 9 * cw, base, "_", size=cs, mono=True))
-    swing = 1.6
-    for j in range(1, 4):
-        y = base + j * clh - 3
-        c.add(c.text(edge, y, HERO_TAIL[0][j], size=cs, mono=True, attrs=c.win([(0, swing / 2)], swing, True)))
-        c.add(c.text(edge, y, HERO_TAIL[1][j], size=cs, mono=True, attrs=c.win([(swing / 2, None)], swing, True)))
-    # Now and then it has something to say.
-    c.add(c.text(cx - 40, base - 2 * clh - 4, "mrrp", size=11, mono=True, fill="muted",
-                 attrs=c.win([(2.2, 3.6)], 11, True)))
+    tail = "".join(c.text(edge, base + (j + 1) * 15, ch, size=cs, mono=True) for j, ch in enumerate(HERO_TAIL))
+    c.rule("@keyframes sway{from{transform:rotate(7deg)}to{transform:rotate(-20deg)}}")
+    c.add(f'<g style="transform-origin:{edge + 2:.1f}px {base - 2}px;animation:sway 1.7s ease-in-out infinite alternate">'
+          f"{tail}</g>")
     return c.render()
 
 
-# ------------------------------------------------------------- work cards
+# ----------------------------------------------------------------- buttons
 
-def card_shell(c, title, name, tagline, award, stack):
-    W, H = c.w, c.h
-    c.add(c.window(2, 2, W - 10, H - 10, title))
+def button(theme, kind, label):
+    """One of the site's buttons, as its own image so each can be a link."""
+    t = THEMES[theme]
+    size = 15
+    tw = advance(("G", 500), label, size)
+    pad = 22
+    if kind == "primary":
+        w = pad + tw + 12 + 30 + 8
+    elif kind == "fun":
+        badge = "highly recommended"
+        bw = advance(("G", 700), badge, 10.5) + 18
+        w = 20 + 10 + tw + 12 + bw + 14
+    else:
+        w = pad + tw + pad
+    W, H = int(w + 10), 56
+    c = Svg(W, H, theme, label, still=2)
+    h = 44
+    if kind == "fun":
+        # The dashed "there's a far more fun version" pill from the site's hero.
+        c.add(f'<rect x="2" y="4" width="{w:.1f}" height="{h}" rx="22" fill="none" stroke="{t["subtle"]}" '
+              f'stroke-width="1.5" stroke-dasharray="5 4"/>')
+        c.rule("@keyframes ping{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.6);opacity:0}}")
+        c.add(f'<circle cx="22" cy="{4 + h / 2}" r="4" fill="{t["accent"]}" stroke="{t["border"]}" stroke-width="1.2"/>'
+              f'<circle cx="22" cy="{4 + h / 2}" r="4" fill="{t["accent"]}" '
+              f'style="transform-box:fill-box;transform-origin:center;animation:ping 1.8s ease-out infinite"/>')
+        c.add(c.text(34, 4 + h / 2 + 5, label, size=size, weight=500))
+        bx = 34 + tw + 12
+        c.rule("@keyframes nudge{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-4deg)}90%{transform:rotate(4deg)}95%{transform:rotate(-2deg)}}")
+        c.add(f'<g style="transform-box:fill-box;transform-origin:center;animation:nudge 3.2s ease-in-out infinite">'
+              f'<rect x="{bx:.1f}" y="{4 + h / 2 - 10}" width="{bw:.1f}" height="20" rx="10" fill="{t["accent"]}" '
+              f'stroke="{t["border"]}" stroke-width="1.5"/>'
+              + c.text(bx + 9, 4 + h / 2 + 3.8, badge, size=10.5, weight=700, fill="accent_ink") + "</g>")
+        return c.render()
+    c.add(f'<rect x="6" y="8" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["border"]}"/>'
+          f'<rect x="2" y="4" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["surface"]}" '
+          f'stroke="{t["border"]}" stroke-width="2"/>')
+    c.add(c.text(pad, 4 + h / 2 + 5, label, size=size, weight=500))
+    if kind == "primary":
+        ax = pad + tw + 12 + 15
+        c.rule("@keyframes go{0%,70%,100%{transform:translateX(0)}82%{transform:translateX(3px)}}")
+        c.add(f'<circle cx="{ax:.1f}" cy="{4 + h / 2}" r="15" fill="{t["accent"]}" stroke="{t["border"]}" stroke-width="1.5"/>'
+              f'<g style="animation:go 2.4s ease-in-out infinite">'
+              + c.text(ax, 4 + h / 2 + 5.5, "→", size=16, weight=700, fill="accent_ink", anchor="middle") + "</g>")
+    return c.render()
+
+
+BUTTONS = {
+    "site": ("primary", "aahil-khan.xyz"),
+    "fun": ("fun", "There’s a far more fun version of this"),
+    "resume": ("plain", "Résumé PDF ↓"),
+    "linkedin": ("plain", "LinkedIn ↗"),
+    "email": ("plain", "Email ↗"),
+}
+
+
+# ------------------------------------------------------------------- work
+
+def work_head(theme):
+    c = Svg(840, 96, theme, "Selected work: four things worth opening", still=1)
+    c.add(c.text(4, 30, "SELECTED WORK", size=11, weight=500, fill="muted", spacing=0.16))
+    c.add(c.text(4, 70, "Four things worth opening", size=30, weight=700, spacing=-0.015))
+    c.add(f'<line x1="4" y1="94" x2="836" y2="94" stroke="{c.t["border"]}" stroke-width="2"/>')
+    return c.render()
+
+
+def work_row(c, num, name, tagline, award, stack):
+    """An index entry: outlined number, name and award, blurb, stack, and an arrow.
+
+    The right-hand third is left for the entry's ticker."""
     t = c.t
+    c.add(c.text(4, 76, num, size=54, weight=700, fill="none", attrs=f'stroke="{t["ink"]}" stroke-width="1.3"'))
+    c.add(c.text(104, 48, name, size=27, weight=700, spacing=-0.01))
     if award:
+        ax = 104 + advance(("G", 700), name, 27, -0.01) + 14
         aw = advance(("G", 700), award, 9.5, 0.08) + 20
-        ax = W - 8 - 14 - aw
-        c.add(f'<rect x="{ax:.1f}" y="9" width="{aw:.1f}" height="19" rx="9.5" fill="{t["accent"]}" '
-              f'stroke="{t["border"]}" stroke-width="1.6"/>')
-        c.add(c.text(ax + 10, 22.2, award, size=9.5, weight=700, fill="accent_ink", spacing=0.08))
-    c.add(f'<rect x="18" y="48" width="{W - 46}" height="140" rx="8" fill="{t["sunken"]}"/>')
-    c.add(c.text(20, 222, name, size=21, weight=700))
-    c.add(c.text(20, 244, tagline, size=13, fill="muted"))
-    c.add(c.text(20, 268, "  ·  ".join(stack), size=10, weight=500, fill="subtle", spacing=0.06))
+        c.add(f'<rect x="{ax:.1f}" y="30" width="{aw:.1f}" height="20" rx="10" fill="{t["accent"]}" '
+              f'stroke="{t["border"]}" stroke-width="1.5"/>')
+        c.add(c.text(ax + 10, 43.6, award, size=9.5, weight=700, fill="accent_ink", spacing=0.08))
+    c.add(c.text(104, 74, tagline, size=14, fill="muted"))
+    c.add(c.text(104, 100, "  ·  ".join(stack), size=10, weight=500, fill="subtle", spacing=0.08))
+    c.rule("@keyframes out{0%,72%,100%{transform:translate(0,0)}84%{transform:translate(3px,-3px)}}")
+    c.add(f'<g style="animation:out 3s ease-in-out infinite">'
+          + c.text(832, 48, "↗", size=22, weight=500, anchor="end") + "</g>")
+    c.add(f'<line x1="4" y1="{c.h - 1.5}" x2="836" y2="{c.h - 1.5}" stroke="{t["subtle"]}" stroke-width="1" '
+          f'stroke-opacity="0.6"/>')
+
+
+TX, FS = 540, 12      # where tickers start, and their size
+CW = MONO * FS
+ROW_Y = (40, 62, 84)
 
 
 def sop_opera(theme):
-    c = Svg(420, 292, theme, "SOP Opera: agentic industrial safety intelligence. Winner, Economic Times "
+    c = Svg(840, 124, theme, "01 SOP Opera: agentic industrial safety intelligence. Winner, Economic Times "
             "AI Hackathon 2.0. A sensor trace crosses its limit, an agent acts, and the decision joins a "
             "tamper-evident hash chain.", still=5)
-    card_shell(c, "sop-opera", "SOP Opera", "Agentic industrial safety intelligence",
-               "WINNER · ET AI HACKATHON 2.0", ["PYTHON", "LANGGRAPH", "FASTAPI", "NEXT.JS"])
+    work_row(c, "01", "SOP Opera", "Agentic industrial safety intelligence", "WINNER · ET AI HACKATHON 2.0",
+             ["PYTHON", "LANGGRAPH", "FASTAPI", "NEXT.JS"])
     t = c.t
-    fs = 12
-    cw = MONO * fs
-    x0, y0, lh = 30, 74, 21
-    col0, cols = 10, 36          # trace columns on screen
-    unit = "_.-~-._.-~-.__.-~-._.-"  # one lap of the trace
-    spike_at = len(unit)
-    unit_full = unit + "/\\" + "_.-~-._"
-    U = len(unit_full)
+    col0, cols = 4, 30
+    unit = "_.-~-._.-~-.__.-~-._.-" + "/\\" + "_.-~-._"
+    spike_at = unit.index("/\\")
+    U = len(unit)
     step = 0.11
     period = U * step
     reps = cols // U + 3
-    trace = unit_full * reps
     clip = f"sc{theme}"
-    c.defs.append(f'<clipPath id="{clip}"><rect x="{x0 + col0 * cw}" y="{y0 - 14}" width="{cols * cw}" height="40"/></clipPath>')
-    c.rule(f"@keyframes scroll{{to{{transform:translateX(-{U * cw:.2f}px)}}}}")
+    c.defs.append(f'<clipPath id="{clip}"><rect x="{TX + col0 * CW}" y="{ROW_Y[0] - 14}" width="{cols * CW}" height="20"/></clipPath>')
+    c.rule(f"@keyframes scroll{{to{{transform:translateX(-{U * CW:.2f}px)}}}}")
     runs = []
-    for k in range(reps):
-        runs += [(unit, "muted"), ("/\\", t["accent"] if theme == "dark" else "#E4572E"), ("_.-~-._", "muted")]
-    c.add(c.text(x0, y0, "vibration", size=fs, mono=True, fill="subtle"))
+    for _ in range(reps):
+        runs += [(unit[:spike_at], "muted"), ("/\\", t["signal"]), (unit[spike_at + 2:], "muted")]
+    c.add(c.text(TX, ROW_Y[0], "vib", size=FS, mono=True, fill="subtle"))
     c.add(f'<g clip-path="url(#{clip})"><g style="animation:scroll {period:.2f}s steps({U}) infinite">'
-          + c.rich(x0 + col0 * cw, y0, runs, size=fs) + "</g></g>")
-    # The limit marker; the spike reaches it once a lap.
-    m = col0 + 28
-    c.add(f'<line x1="{x0 + m * cw + cw / 2:.1f}" y1="{y0 - 16}" x2="{x0 + m * cw + cw / 2:.1f}" y2="{y0 + 6}" '
+          + c.rich(TX + col0 * CW, ROW_Y[0], runs, size=FS) + "</g></g>")
+    m = col0 + 24
+    c.add(f'<line x1="{TX + m * CW + CW / 2:.1f}" y1="{ROW_Y[0] - 14}" x2="{TX + m * CW + CW / 2:.1f}" y2="{ROW_Y[0] + 5}" '
           f'stroke="{t["subtle"]}" stroke-dasharray="2 3"/>')
     hit = ((col0 + spike_at - m) % U) * step
-    alert = (hit, hit + 1.6)
-    c.add(c.rich(x0, y0 + lh * 1.3, [("limit ", "subtle"), ("! over threshold", "ink")], size=fs,
-                 attrs=c.win([alert], period, True)))
-    # Each alert gets a decision, and the decision gets hashed onto the chain.
     laps = 4
     long = period * laps
-    blocks = ["a3f9", "9c1e", "e07b", "41d2"]
     acts = ["isolate pump P-12", "notify shift lead", "lock valve V-3", "log and close"]
+    blocks = ["a3f9", "9c1e", "e07b", "41d2"]
     for k in range(laps):
-        t0 = hit + k * period + 0.3
-        s, _ = typed(c, x0, y0 + lh * 2.6, "agent  " + acts[k], t0, long, cps=40,
-                     end=min(t0 + period - 0.4, long), size=fs)
-        c.add(s)
-    chain_y = y0 + lh * 4.2
-    c.add(c.text(x0, chain_y, "audit", size=fs, mono=True, fill="subtle"))
-    for k, b in enumerate(blocks):
-        at = hit + k * period + 0.9
-        seg = f"[{b}]" if k == 0 else f"-[{b}]"
-        cx = x0 + (7 + k * 7) * cw - (cw if k else 0)
-        c.add(c.text(cx, chain_y, seg, size=fs, mono=True, attrs=c.win([(at, long - 0.2)], long, True)))
+        at = hit + k * period
+        c.add(c.rich(TX, ROW_Y[1], [("! ", t["signal"]), (acts[k], "ink")], size=FS,
+                     attrs=c.win([(at, min(at + period - 0.2, long))], long, True)))
+        seg = f"[{blocks[k]}]" if k == 0 else f"-[{blocks[k]}]"
+        bx = TX + (4 + k * 7 - (1 if k else 0)) * CW
+        c.add(c.text(bx, ROW_Y[2], seg, size=FS, mono=True, attrs=c.win([(at + 0.6, long - 0.2)], long, True)))
+    c.add(c.text(TX, ROW_Y[2], "log", size=FS, mono=True, fill="subtle"))
     return c.render()
 
 
 def konta(theme):
-    c = Svg(420, 292, theme, "Konta: local-first, context-aware browsing. Winner, Samsung PRISM Web Agent "
-            "Hackathon. Open tabs become a knowledge graph you can search in plain words.", still=6.5)
-    card_shell(c, "konta", "Konta", "Local-first context-aware browsing",
-               "WINNER · SAMSUNG PRISM", ["REACT", "TYPESCRIPT", "CHROME"])
-    fs = 12
-    cw = MONO * fs
-    x0, y0, lh = 30, 72, 16
-    P = 9.0
-    end = P - 0.5
-    tabs = [(0, "[github]"), (10, "[arxiv]"), (19, "[docs]"), (27, "[youtube]")]
+    c = Svg(840, 124, theme, "02 Konta: local-first, context-aware browsing. Winner, Samsung PRISM Web Agent "
+            "Hackathon. Open tabs become a graph you can search in plain words.", still=6.5)
+    work_row(c, "02", "Konta", "Local-first context-aware browsing", "WINNER · SAMSUNG PRISM",
+             ["REACT", "TYPESCRIPT", "CHROME"])
+    P, end = 9.0, 8.5
+    tabs = [(0, "[github]"), (9, "[arxiv]"), (17, "[docs]"), (24, "[yt]")]
     for k, (col, tab) in enumerate(tabs):
-        c.add(c.text(x0 + col * cw, y0, tab, size=fs, mono=True, fill="muted", attrs=c.win([(0.2 + k * 0.35, end)], P, True)))
-    graph = [
-        "   \\         |        |        /",
-        "    o--------o--------o-------o",
-        "         \\       /  \\     /",
-        "          o-----o    o---o",
-    ]
-    for i, g in enumerate(graph):
-        c.add(c.text(x0, y0 + (i + 1) * lh, g, size=fs, mono=True, fill="subtle",
-                     attrs=c.win([(1.8 + i * 0.25, end)], P, True)))
-    q, done = typed(c, x0, y0 + 5.3 * lh, '? "that rag paper from tuesday"', 3.2, P, cps=18, end=end, size=fs)
+        c.add(c.text(TX + col * CW, ROW_Y[0], tab, size=FS, mono=True, fill="muted",
+                     attrs=c.win([(0.2 + k * 0.3, end)], P, True)))
+    nodes = [col + len(tab) // 2 for col, tab in tabs]
+    graph = [" "] * (nodes[-1] + 1)
+    for a, b in zip(nodes, nodes[1:]):
+        for i in range(a, b):
+            graph[i] = "-"
+    for n in nodes:
+        graph[n] = "o"
+    c.add(c.text(TX, ROW_Y[1], "".join(graph), size=FS, mono=True, fill="subtle", attrs=c.win([(1.5, end)], P, True)))
+    q, done = typed(c, TX, ROW_Y[2], '? "that rag paper"', 2.3, P, cps=16, end=end, size=FS)
     c.add(q)
-    c.add(c.rich(x0, y0 + 6.3 * lh, [("  -> ", "subtle"), ("arxiv.org/abs/2312.10997", "ink")], size=fs,
-                 attrs=c.win([(done + 0.3, end)], P, True)))
-    # The tab, edge and node it came from light up.
-    hi = "#E4572E" if theme == "light" else c.t["accent"]
     lit = c.win([(done + 0.3, end)], P, True)
-    for col, row, glyph in [(10, 0, "[arxiv]"), (13, 1, "|"), (13, 2, "@")]:
-        y = y0 + row * lh
-        c.add(f'<g {lit}><rect x="{x0 + col * cw:.1f}" y="{y - 11}" width="{len(glyph) * cw:.1f}" height="14" '
-              f'fill="{c.t["sunken"]}"/>' + c.text(x0 + col * cw, y, glyph, size=fs, mono=True, fill=hi) + "</g>")
+    c.add(c.rich(TX + 18 * CW, ROW_Y[2], [(" -> ", "subtle"), ("arxiv", "ink")], size=FS, attrs=lit))
+    # The tab and node it came from light up, covering the plain ones.
+    for col, row, glyph in [(tabs[1][0], 0, tabs[1][1]), (nodes[1], 1, "@")]:
+        y = ROW_Y[row]
+        c.add(f'<g {lit}><rect x="{TX + col * CW:.1f}" y="{y - 11}" width="{len(glyph) * CW:.1f}" height="14" '
+              f'fill="{c.t["page"]}"/>' + c.text(TX + col * CW, y, glyph, size=FS, mono=True, fill="signal") + "</g>")
     return c.render()
 
 
 def flowsync(theme):
-    c = Svg(420, 292, theme, "FlowSync AI: project memory for coding agents, over MCP. Innovation Award, "
-            "Agentic AI Hackathon, Ulster University. Git pushes stream into a project brain that an agent "
-            "can question later.", still=7)
-    card_shell(c, "flowsync", "FlowSync AI", "Project memory for coding agents, over MCP",
-               "INNOVATION AWARD · ULSTER", ["TYPESCRIPT", "PYTHON", "AWS", "BEDROCK"])
-    t = c.t
-    fs = 12
-    cw = MONO * fs
-    x0, y0, lh = 30, 72, 17
-    P = 10.0
-    end = P - 0.5
-    s, t1 = typed(c, x0, y0, "$ git push origin main", 0.2, P, cps=20, end=end, size=fs)
+    c = Svg(840, 124, theme, "03 FlowSync AI: project memory for coding agents, over MCP. Innovation Award, "
+            "Agentic AI Hackathon, Ulster University. Pushes stream into a project brain an agent can ask later.",
+            still=7)
+    work_row(c, "03", "FlowSync AI", "Project memory for coding agents, over MCP", "INNOVATION AWARD · ULSTER",
+             ["TYPESCRIPT", "PYTHON", "AWS", "BEDROCK"])
+    P, end = 10.0, 9.5
+    s, t1 = typed(c, TX, ROW_Y[0], "$ git push origin main", 0.2, P, cps=20, end=end, size=FS)
     c.add(s)
-    commits = [("3f2a", "switch vector store to qdrant"), ("9b1c", "cache embeddings per repo")]
-    for k, (h, msg) in enumerate(commits):
-        c.add(c.rich(x0, y0 + (k + 1) * lh, [(f"  {h} ", "subtle"), (msg, "ink")], size=fs,
-                     attrs=c.win([(t1 + 0.3 + k * 0.3, end)], P, True)))
-    # Packets travel into the brain; its memory fills.
-    py = y0 + 3.3 * lh
-    c.add(c.text(x0, py, "  ----------> [ project brain ]", size=fs, mono=True, fill="subtle",
-                 attrs=c.win([(t1 + 0.9, end)], P, True)))
-    t2 = t1 + 1.1
+    c.add(c.text(TX, ROW_Y[1], "  --------> [brain", size=FS, mono=True, fill="subtle", attrs=c.win([(t1 + 0.2, end)], P, True)))
+    t2 = t1 + 0.4
     for k in range(3):
-        for j in range(11):
-            at = t2 + k * 0.55 + j * 0.045
-            c.add(c.text(x0 + (2 + j) * cw, py, "*", size=fs, mono=True, fill="ink",
-                         attrs=c.win([(at, at + 0.045)], P, True)))
-    fill = ["[##--------]", "[#####-----]", "[########--]"]
-    spans = [(t2 + 0.5, t2 + 1.05), (t2 + 1.05, t2 + 1.6), (t2 + 1.6, end)]
-    c.add(frames(c, x0 + 32 * cw, py, fill, spans, P, size=fs, fill="muted"))
-    q, t3 = typed(c, x0, y0 + 4.8 * lh, "agent> why did we move to qdrant?", t2 + 2.0, P, cps=22, end=end, size=fs)
+        for j in range(8):
+            at = t2 + k * 0.5 + j * 0.05
+            c.add(c.text(TX + (2 + j) * CW, ROW_Y[1], "*", size=FS, mono=True, attrs=c.win([(at, at + 0.05)], P, True)))
+    fills = ["       ]", " #     ]", " ###   ]", " ##### ]"]
+    spans = [(t1 + 0.2, t2 + 0.4), (t2 + 0.4, t2 + 0.9), (t2 + 0.9, t2 + 1.4), (t2 + 1.4, end)]
+    c.add(frames(c, TX + 18 * CW, ROW_Y[1], fills, spans, P, size=FS, fill="muted"))
+    q, t3 = typed(c, TX, ROW_Y[2], "? why qdrant", t2 + 1.9, P, cps=16, end=end, size=FS)
     c.add(q)
-    c.add(c.rich(x0, y0 + 5.9 * lh, [("brain> ", "subtle"), ("see 3f2a, ", "ink"), ('"switch vector store"', "muted")],
-                 size=fs, attrs=c.win([(t3 + 0.4, end)], P, True)))
+    c.add(c.rich(TX + 12 * CW, ROW_Y[2], [(" -> ", "subtle"), ("see 3f2a", "ink")], size=FS,
+                 attrs=c.win([(t3 + 0.3, end)], P, True)))
     return c.render()
 
 
 def gina(theme):
-    c = Svg(420, 292, theme, "GINA: natural language to SQL analytics. A question becomes a query, and "
+    c = Svg(840, 124, theme, "04 GINA: natural language to SQL analytics. A question becomes a query, and "
             "the query becomes a chart.", still=7.5)
-    card_shell(c, "gina", "GINA", "Natural language → SQL analytics", None,
-               ["NEXT.JS", "TYPESCRIPT", "POSTGRESQL"])
-    fs = 12
-    cw = MONO * fs
-    x0, y0, lh = 30, 72, 16
-    P = 10.0
-    end = P - 0.5
-    q, t1 = typed(c, x0, y0, "> top 3 cities by revenue", 0.2, P, cps=16, end=end, size=fs)
+    work_row(c, "04", "GINA", "Natural language → SQL analytics", None, ["NEXT.JS", "TYPESCRIPT", "POSTGRESQL"])
+    P, end = 10.0, 9.5
+    q, t1 = typed(c, TX, ROW_Y[0], "> top 3 cities by revenue", 0.2, P, cps=16, end=end, size=FS)
     c.add(q)
-    sql = [
-        [("SELECT ", "subtle"), ("city, SUM(revenue) AS rev", "ink")],
-        [("FROM ", "subtle"), ("sales ", "ink"), ("GROUP BY ", "subtle"), ("city", "ink")],
-        [("ORDER BY ", "subtle"), ("rev ", "ink"), ("DESC LIMIT ", "subtle"), ("3", "ink")],
-    ]
-    for i, runs in enumerate(sql):
-        c.add(c.rich(x0, y0 + (i + 1) * lh, runs, size=fs, attrs=c.win([(t1 + 0.4 + i * 0.25, end)], P, True)))
-    t2 = t1 + 1.6
-    bars = [("Delhi ", 16, "4.2M"), ("Mumbai", 12, "3.1M"), ("Pune  ", 7, "1.8M")]
-    for i, (city, n, val) in enumerate(bars):
-        y = y0 + (i + 4.4) * lh
-        c.add(c.text(x0, y, city, size=fs, mono=True, fill="muted", attrs=c.win([(t2, end)], P, True)))
-        # Each bar grows a block at a time.
+    c.add(c.rich(TX, ROW_Y[1], [("SELECT ", "subtle"), ("city, SUM(rev) ", "ink"), ("FROM ", "subtle"), ("sales", "ink")],
+                 size=FS, attrs=c.win([(t1 + 0.4, end)], P, True)))
+    at = t1 + 1.0
+    col = 0
+    for city, n in [("Delhi", 6), ("Mumbai", 4), ("Pune", 2)]:
+        c.add(c.text(TX + col * CW, ROW_Y[2], city, size=FS, mono=True, fill="muted", attrs=c.win([(at, end)], P, True)))
+        col += len(city) + 1
         for j in range(n):
-            at = t2 + 0.2 + i * 0.15 + j * 0.05
-            c.add(c.text(x0 + (8 + j) * cw, y, "#", size=fs, mono=True, fill="ink",
-                         attrs=c.win([(at, end)], P, True)))
-        c.add(c.text(x0 + (9 + n) * cw, y, val, size=fs, mono=True, fill="subtle",
-                     attrs=c.win([(t2 + 0.2 + i * 0.15 + n * 0.05, end)], P, True)))
+            c.add(c.text(TX + col * CW, ROW_Y[2], "#", size=FS, mono=True, attrs=c.win([(at + 0.1 + j * 0.07, end)], P, True)))
+            col += 1
+        at += 0.1 + n * 0.07
+        col += 2
     return c.render()
 
 
@@ -608,82 +636,130 @@ def stack(theme):
 
 # ----------------------------------------------------------------- footer
 
-WALK_HEAD = "      /\\_/\\"
-WALK_EYES = (" ____/ o o \\", " ____/ - - \\")
-WALK_TAIL = ("/~____  =^= /", "\\~____  =^= /")
-WALK_PAWS = ("(______)__m_m)", "(_m____)_m__m)")
+# A side-on cat walking left, in two strides; tail up and flicking in time.
+WALK = (
+    ["    /\\_/\\             ,",
+     "   ( o.o )           //",
+     "    > ^ < \\_________//",
+     "     (              )",
+     "      \\_  _______  _/",
+     "        \\ \\      / /"],
+    ["    /\\_/\\            _",
+     "   ( o.o )          ( )",
+     "    > ^ < \\_________/ /",
+     "     (              )",
+     "      \\_  _______  _/",
+     "        / /      \\ \\"],
+)
+# Sitting, head where the walking head was.
+SIT = ["    /\\_/\\",
+       "   ( o.o )",
+       "    > ^ <",
+       "   /     \\",
+       "  (  | |  )_",
+       "   \\_|_|_/  )"]
+SIT_BLINK = "   ( -.- )"
+SIT_TAIL = ("  (  | |  )_", "  (  | |  )__")
+SIT_TIP = ("   \\_|_|_/  )", "   \\_|_|_/   )")
 
 
 def footer(theme):
-    W, H = 840, 250
-    c = Svg(W, H, theme, "Let's build something. Open for cool builds and interesting problems. "
-            "A cat strolls along the bottom, stops to say mrrp, and walks off.", still=8.5)
+    W, H = 840, 268
+    c = Svg(W, H, theme, "Let's build something. Open for cool builds and interesting problems; email is "
+            "fastest. A cat walks in, sits down to say mrrp, and walks off.", still=9.5)
     t = c.t
-    c.add(c.paper(2, 2, W - 10, H - 10))
+    c.add(c.card(2, 2, W - 10, H - 10, fill="band"))
     c.add(c.text(40, 54, "CONTACT", size=11, weight=500, fill="muted", spacing=0.16))
-    c.add(c.text(40, 96, "Let's build something.", size=34, weight=700, spacing=-0.02))
+    c.add(c.text(40, 96, "Let\u2019s build something.", size=34, weight=700, spacing=-0.02))
     c.add(c.text(40, 124, "Open for cool builds and interesting problems. Email is fastest, I answer all of them.",
                  size=14, fill="muted"))
 
-    period = 18.0
-    fs, lh = 14, 16.5
+    fs, lh = 14, 15
     cw = MONO * fs
-    base = 164
-    x0, xs, x1 = -130, W / 2 - 60, W + 20
-    stop, go = 0.45, 0.58
+    top = 150
+    period = 22.0
+    stride = 0.25                      # one leg frame, and one step forward
+    step_px = 2 * cw
+    x_in, x_sit = W + 10, W / 2 - 60
+    n_in = round((x_in - x_sit) / step_px)
+    x_sit = x_in - n_in * step_px
+    n_out = 34
+    x_out = x_sit - n_out * step_px
+    t_sit = n_in * stride
+    t_up = t_sit + 4.5
+    t_gone = t_up + n_out * stride
 
-    def alternate(t0, t1, dt):
-        spans, s = [], t0
-        while s < t1:
-            spans.append((s, min(s + dt, t1)))
-            s += 2 * dt
-        return spans
+    def pose(rows, spans):
+        attrs = c.win(spans, period, True)
+        return f"<g {attrs}>" + "".join(c.text(0, top + i * lh, r, size=fs, mono=True) for i, r in enumerate(rows)) + "</g>"
 
-    def swap(row, pair, spans_b):
-        spans_a, cur = [], 0.0
-        for s, e in sorted(spans_b):
-            if s > cur:
-                spans_a.append((cur, s))
-            cur = e
-        if cur < period:
-            spans_a.append((cur, period))
-        y = base + row * lh
-        return (c.text(0, y, pair[0], size=fs, mono=True, attrs=c.win(spans_a, period, True))
-                + c.text(0, y, pair[1], size=fs, mono=True, attrs=c.win(spans_b, period, True)))
+    def strides(t0, t1, phase):
+        return [(s, s + stride) for k, s in enumerate(frange(t0, t1, stride)) if k % 2 == phase]
 
-    walking = [(0, stop * period), (go * period, period)]
-    paws = [sp for w in walking for sp in alternate(w[0] + 0.3, w[1], 0.3)]
-    tail = [sp for w in walking for sp in alternate(w[0] + 0.6, w[1], 0.6)]
-    pause = stop * period
-    blink = [(pause + 0.5, pause + 0.65), (pause + 1.4, pause + 1.55), (3.1, 3.25), (13.4, 13.55)]
-    cat = (c.text(0, base, WALK_HEAD, size=fs, mono=True)
-           + swap(1, WALK_EYES, blink) + swap(2, WALK_TAIL, tail) + swap(3, WALK_PAWS, paws)
-           + c.text(12 * cw, base - 18, "mrrp?", size=11, mono=True, fill="muted",
-                    attrs=c.win([(pause + 0.4, go * period - 0.3)], period, True)))
+    walk = pose(WALK[0], strides(0, t_sit, 0) + strides(t_up, t_gone, 0)) \
+        + pose(WALK[1], strides(0, t_sit, 1) + strides(t_up, t_gone, 1))
+
+    # Sitting: blinks twice, flicks its tail tip, and says something.
+    sit_on = [(t_sit, t_up)]
+    blinks = [(t_sit + 1.0, t_sit + 1.15), (t_sit + 2.8, t_sit + 2.95)]
+    sit = "".join(c.text(0, top + i * lh, r, size=fs, mono=True, attrs=c.win(sit_on, period, True))
+                  for i, r in enumerate(SIT) if i not in (1, 4, 5))
+    eyes_open = [(t_sit, blinks[0][0]), (blinks[0][1], blinks[1][0]), (blinks[1][1], t_up)]
+    sit += c.text(0, top + lh, SIT[1], size=fs, mono=True, attrs=c.win(eyes_open, period, True))
+    sit += c.text(0, top + lh, SIT_BLINK, size=fs, mono=True, attrs=c.win(blinks, period, True))
+    flick = [(s, s + 0.4) for s in frange(t_sit + 0.4, t_up - 0.4, 0.8)]
+    rest = []
+    cur = t_sit
+    for s, e in flick:
+        rest.append((cur, s))
+        cur = e
+    rest.append((cur, t_up))
+    for row, pair in ((4, SIT_TAIL), (5, SIT_TIP)):
+        sit += c.text(0, top + row * lh, pair[0], size=fs, mono=True, attrs=c.win(rest, period, True))
+        sit += c.text(0, top + row * lh, pair[1], size=fs, mono=True, attrs=c.win(flick, period, True))
+    say = c.text(-4 * cw, top - 12, "mrrp?", size=12, mono=True, fill="muted",
+                 attrs=c.win([(t_sit + 1.6, t_up - 0.6)], period, True))
+
+    pct = lambda s: f"{s / period * 100:.2f}%"
+    c.rule("@keyframes stroll{"
+           f"0%{{transform:translateX({x_in:.1f}px);animation-timing-function:steps({n_in},end)}}"
+           f"{pct(t_sit)}{{transform:translateX({x_sit:.1f}px);animation-timing-function:linear}}"
+           f"{pct(t_up)}{{transform:translateX({x_sit:.1f}px);animation-timing-function:steps({n_out},end)}}"
+           f"{pct(t_gone)},100%{{transform:translateX({x_out:.1f}px)}}}}")
+    c.rule(f"@media (prefers-reduced-motion: reduce){{.cat{{transform:translateX({x_sit:.1f}px)}}}}")
     clip = f"fc{theme}"
-    c.defs.append(f'<clipPath id="{clip}"><rect x="4" y="100" width="{W - 14}" height="{H - 110}" rx="12"/></clipPath>')
-    c.rule(f"@keyframes cross{{0%{{transform:translateX({x0}px)}}{stop * 100:.1f}%,{go * 100:.1f}%"
-           f"{{transform:translateX({xs}px)}}100%{{transform:translateX({x1}px)}}}}")
-    ground = base + 3 * lh + 9
+    c.defs.append(f'<clipPath id="{clip}"><rect x="3" y="130" width="{W - 12}" height="{H - 142}" rx="12"/></clipPath>')
+    ground = top + 5 * lh + 9
     c.add(f'<line x1="40" y1="{ground}" x2="{W - 48}" y2="{ground}" stroke="{t["subtle"]}" '
           f'stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"/>')
-    c.rule(f"@media (prefers-reduced-motion: reduce){{.walker{{transform:translateX({xs}px)}}}}")
-    c.add(f'<g clip-path="url(#{clip})"><g class="walker" style="animation:cross {period}s linear infinite">{cat}</g></g>')
+    c.add(f'<g clip-path="url(#{clip})"><g class="cat" style="animation:stroll {period}s infinite">'
+          f"{walk}{sit}{say}</g></g>")
     return c.render()
 
 
+def frange(a, b, step):
+    out, x = [], a
+    while x < b - 1e-9:
+        out.append(round(x, 4))
+        x += step
+    return out
+
+
 PIECES = {
-    "hero": hero, "work-sop-opera": sop_opera, "work-konta": konta, "work-flowsync": flowsync,
-    "work-gina": gina, "stack": stack, "footer": footer,
+    "hero": hero, "work-head": work_head, "work-sop-opera": sop_opera, "work-konta": konta,
+    "work-flowsync": flowsync, "work-gina": gina, "stack": stack, "footer": footer,
 }
 
 
 def main():
     OUT.mkdir(exist_ok=True)
-    for name, fn in PIECES.items():
-        for theme in THEMES:
-            svg = fn(theme)
-            (OUT / f"{name}-{theme}.svg").write_text(svg)
+    for old in OUT.glob("*.svg"):
+        old.unlink()
+    for theme in THEMES:
+        for name, fn in PIECES.items():
+            (OUT / f"{name}-{theme}.svg").write_text(fn(theme))
+        for name, (kind, label) in BUTTONS.items():
+            (OUT / f"btn-{name}-{theme}.svg").write_text(button(theme, kind, label))
     sizes = {p.name: p.stat().st_size // 1024 for p in sorted(OUT.glob("*.svg"))}
     print("  ".join(f"{k} {v}K" for k, v in sizes.items()))
 
