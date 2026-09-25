@@ -15,8 +15,6 @@ I build whatever sends me down a rabbit hole. These days it's mostly software, w
 <a href="https://github.com/konta-oss/konta"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/work-konta-dark.svg" /><img alt="03 Konta: local-first context-aware browsing. Winner, Samsung PRISM Web Agent Hackathon." src="assets/work-konta-light.svg" width="100%" /></picture></a>
 <a href="https://github.com/anoushkawasthi/flowsync"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/work-flowsync-dark.svg" /><img alt="04 FlowSync AI: project memory for coding agents, over MCP. Innovation Award, Agentic AI Hackathon, Ulster University." src="assets/work-flowsync-light.svg" width="100%" /></picture></a>
 
-<sub>Write-ups on [aahil-khan.xyz](https://aahil-khan.xyz/#work). Also around here: [GINA](https://github.com/vanshGupta18/Gina_cfp) · [Peekaboo](https://github.com/aahil-khan/Peekaboo)</sub>
-
 <br>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/stack-dark.svg" /><img alt="What I build with. Languages: Python, TypeScript, JavaScript. Frameworks: React, Next.js, Node.js, Express, FastAPI, Flask. Databases: PostgreSQL, MySQL, Redis, DynamoDB, Prisma. Cloud and DevOps: AWS, Docker, GitHub Actions, Nginx, Git. AI and ML: RAG, LangGraph, vector search, LLMs, multi-agent systems. Testing: Jest, Vitest." src="assets/stack-light.svg" width="100%" /></picture>
