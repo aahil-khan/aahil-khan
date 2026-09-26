@@ -1,0 +1,29 @@
+name: Profile views
+
+# The README counts visits through an invisible komarev image; this redraws
+# the views pill from that count so it matches the other buttons.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  views:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install fonttools
+      - run: python3 scripts/render.py --views
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/views.json assets/btn-views-*.svg
+          git diff --cached --quiet || git commit -m "Update profile views [skip ci]"
+          git push

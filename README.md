@@ -4,6 +4,7 @@
 <a href="https://www.aahil-khan.xyz/aahil-khan-resume.pdf"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-resume-dark.svg" /><img alt="Résumé PDF" src="assets/btn-resume-light.svg" width="154" /></picture></a>
 <a href="https://www.linkedin.com/in/aahil-khan77/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-linkedin-dark.svg" /><img alt="LinkedIn" src="assets/btn-linkedin-light.svg" width="127" /></picture></a>
 <a href="mailto:aahilminookhan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-email-dark.svg" /><img alt="Email" src="assets/btn-email-light.svg" width="104" /></picture></a>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-views-dark.svg" /><img alt="Profile views" src="assets/btn-views-light.svg" /></picture><img src="https://komarev.com/ghpvc/?username=aahil-khan" width="0" height="0" alt="" />
 
 I build whatever sends me down a rabbit hole. These days it's mostly software, with a little electronics on the side.
 

@@ -16,7 +16,10 @@ means the ASCII art lines up the same in every browser.
 import base64
 import html
 import io
+import json
 import pathlib
+import re
+import sys
 import urllib.request
 from collections import defaultdict
 
@@ -28,6 +31,7 @@ ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT.parent / "assets"
 FONT_DIR = ROOT / ".fonts"
 LOGOS = ROOT / "logos"
+VIEWS = ROOT / "views.json"
 
 FONT_URLS = {
     "SpaceGrotesk.ttf": "https://github.com/google/fonts/raw/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf",
@@ -371,6 +375,56 @@ BUTTONS = {
 }
 
 
+# ------------------------------------------------------------------ views
+
+# The README loads this counter as an invisible image, so every visit counts.
+# It only counts requests from GitHub's image proxy, so reading it here is free.
+COUNTER = "https://komarev.com/ghpvc/?username=aahil-khan"
+
+
+def views_button(theme, views):
+    """A pill like the plain buttons, with a live dot instead of an arrow."""
+    t = THEMES[theme]
+    label = f"{views:,} profile views"
+    size = 15
+    tw = advance(("G", 500), label, size)
+    pad = 22
+    dot = 10 + 10
+    w = pad + dot + tw + pad
+    W, H = int(w + 10), 56
+    c = Svg(W, H, theme, label, still=0)
+    h = 44
+    cy = 4 + h / 2
+    c.add(f'<rect x="6" y="8" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["border"]}"/>'
+          f'<rect x="2" y="4" width="{w - 4:.1f}" height="{h}" rx="22" fill="{t["surface"]}" '
+          f'stroke="{t["border"]}" stroke-width="2"/>')
+    c.rule("@keyframes ping{from{transform:scale(1);opacity:.7}to{transform:scale(2.4);opacity:0}}")
+    c.add(f'<circle cx="{pad + 5}" cy="{cy}" r="5" fill="{t["accent"]}" '
+          f'style="transform-box:fill-box;transform-origin:center;animation:ping 2.4s ease-out infinite"/>'
+          f'<circle cx="{pad + 5}" cy="{cy}" r="5" fill="{t["accent"]}" stroke="{t["border"]}" stroke-width="1.5"/>')
+    c.add(c.text(pad + dot, cy + 5, label, size=size, weight=500))
+    return c.render()
+
+
+def render_views():
+    views = json.loads(VIEWS.read_text())["views"]
+    for theme in THEMES:
+        (OUT / f"btn-views-{theme}.svg").write_text(views_button(theme, views))
+
+
+def update_views():
+    """Read the counter, then redraw only the views pill."""
+    state = json.loads(VIEWS.read_text())
+    req = urllib.request.Request(COUNTER, headers={"User-Agent": "aahil-khan-readme"})
+    svg = urllib.request.urlopen(req, timeout=20).read().decode()
+    total = int(re.findall(r">([\d,]+)</text>", svg)[-1].replace(",", ""))
+    if total > state["views"]:
+        state["views"] = total
+        VIEWS.write_text(json.dumps(state, indent=2) + "\n")
+        render_views()
+    print(f"views {state['views']}")
+
+
 # ------------------------------------------------------------------- work
 
 def work_head(theme):
@@ -688,9 +742,13 @@ def main():
             (OUT / f"{name}-{theme}.svg").write_text(fn(theme))
         for name, (kind, label) in BUTTONS.items():
             (OUT / f"btn-{name}-{theme}.svg").write_text(button(theme, kind, label))
+    render_views()
     sizes = {p.name: p.stat().st_size // 1024 for p in sorted(OUT.glob("*.svg"))}
     print("  ".join(f"{k} {v}K" for k, v in sizes.items()))
 
 
 if __name__ == "__main__":
-    main()
+    if "--views" in sys.argv:
+        update_views()
+    else:
+        main()
