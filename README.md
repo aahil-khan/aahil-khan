@@ -23,3 +23,7 @@ I build whatever sends me down a rabbit hole. These days it's mostly software, w
 <br><br>
 
 <a href="mailto:aahilminookhan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg" /><img alt="Let's build something. Open for cool builds and interesting problems; email is fastest. A small cat trots across, stops to blink, and trots on." src="assets/footer-light.svg" width="100%" /></picture></a>
+
+<br>
+
+<sub>The design of this README and [aahil-khan.xyz](https://aahil-khan.xyz) is mine, and the site code is [MIT](https://github.com/aahil-khan/portfolio-canvas). If you reskin either, a credit is appreciated. Please don't copy the layout wholesale.</sub>
