@@ -26,4 +26,4 @@ I build whatever sends me down a rabbit hole. These days it's mostly software, w
 
 <br>
 
-<sub>The design of this README and [aahil-khan.xyz](https://aahil-khan.xyz) is mine, and the site code is [MIT](https://github.com/aahil-khan/portfolio-canvas). If you reskin either, a credit is appreciated. Please don't copy the layout wholesale.</sub>
+ <sub>The design of this README and [aahil.is-a.dev](https://aahil.is-a.dev) is mine, and the site code is [MIT](https://github.com/aahil-khan/portfolio-canvas). If you take inspiration from either, credit is appreciated. Please don't copy the layout 1:1 :) </sub>
